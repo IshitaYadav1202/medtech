@@ -27,7 +27,12 @@ app.use(morgan('dev'))
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'CarePulse API is running' })
+  res.json({ status: 'ok', message: 'CarePulse API is running', timestamp: new Date().toISOString() })
+})
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ message: 'CarePulse API', version: '1.0.0' })
 })
 
 // Routes
