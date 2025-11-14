@@ -33,7 +33,7 @@ export const authAPI = {
     const response = await api.get('/auth/me', {
       headers: { Authorization: `Bearer ${token}` },
     })
-    return response.data
+    return response.data.user || response.data
   },
 
   forgotPassword: async (email) => {

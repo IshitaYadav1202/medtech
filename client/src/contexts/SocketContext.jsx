@@ -18,24 +18,40 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (user) {
-      const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
-        auth: {
-          token: localStorage.getItem('token'),
-        },
-      })
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+        const newSocket = io(apiUrl, {
+          auth: {
+            token: localStorage.getItem('token'),
+          },
+          reconnection: true,
+          reconnectionDelay: 1000,
+        })
 
-      newSocket.on('connect', () => {
-        console.log('Socket connected')
-      })
+        newSocket.on('connect', () => {
+          console.log('Socket connected')
+        })
 
-      newSocket.on('disconnect', () => {
-        console.log('Socket disconnected')
-      })
+        newSocket.on('disconnect', () => {
+          console.log('Socket disconnected')
+        })
 
-      setSocket(newSocket)
+        newSocket.on('connect_error', (error) => {
+          console.error('Socket connection error:', error)
+        })
 
-      return () => {
-        newSocket.close()
+        setSocket(newSocket)
+
+        return () => {
+          newSocket.close()
+        }
+      } catch (error) {
+        console.error('Error initializing socket:', error)
+      }
+    } else {
+      if (socket) {
+        socket.close()
+        setSocket(null)
       }
     }
   }, [user])

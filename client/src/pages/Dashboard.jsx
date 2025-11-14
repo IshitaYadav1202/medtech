@@ -44,11 +44,15 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       // Load medications, appointments, feed
-      const [meds, appts, feed] = await Promise.all([
-        medicationsAPI.getAll(),
-        appointmentsAPI.getAll(),
-        feedAPI.getAll({ limit: 5 }),
+      const [medsResponse, apptsResponse, feedResponse] = await Promise.all([
+        medicationsAPI.getAll().catch(() => ({ data: [] })),
+        appointmentsAPI.getAll().catch(() => ({ data: [] })),
+        feedAPI.getAll({ limit: 5 }).catch(() => ({ data: [] })),
       ])
+
+      const meds = medsResponse.data || medsResponse || []
+      const appts = apptsResponse.data || apptsResponse || []
+      const feed = feedResponse.data || feedResponse || []
 
       const missedMeds = meds.filter((m) => m.missedDoses > 0).length
       const upcomingAppts = appts.filter(
@@ -61,9 +65,11 @@ const Dashboard = () => {
         symptomsToday: 0, // TODO: Load from symptoms API
         alerts: 0, // TODO: Load from alerts API
       })
-      setFeedItems(feed)
+      setFeedItems(Array.isArray(feed) ? feed : [])
     } catch (error) {
       console.error('Error loading dashboard:', error)
+      setStats({ missedMeds: 0, upcomingAppts: 0, symptomsToday: 0, alerts: 0 })
+      setFeedItems([])
     } finally {
       setLoading(false)
     }

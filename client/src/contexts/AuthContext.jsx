@@ -27,10 +27,11 @@ export const AuthProvider = ({ children }) => {
 
   const validateToken = async (token) => {
     try {
-      const userData = await authAPI.validateToken(token)
-      setUser(userData)
+      const response = await authAPI.validateToken(token)
+      setUser(response.user || response)
     } catch (error) {
       localStorage.removeItem('token')
+      setUser(null)
     } finally {
       setLoading(false)
     }
