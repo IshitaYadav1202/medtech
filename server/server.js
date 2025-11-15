@@ -7,6 +7,13 @@ import app from './app.js'
 
 dotenv.config()
 
+// Ensure JWT_SECRET is set
+if (!process.env.JWT_SECRET) {
+  console.warn('⚠️  WARNING: JWT_SECRET not set in environment variables')
+  console.warn('⚠️  Using default secret (NOT SECURE FOR PRODUCTION)')
+  process.env.JWT_SECRET = 'carepulse-default-secret-change-in-production'
+}
+
 const PORT = process.env.PORT || 5000
 
 // Create HTTP server
