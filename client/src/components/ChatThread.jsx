@@ -45,9 +45,9 @@ const ChatThread = ({ thread, onSendMessage }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-        {thread?.messages && thread.messages.length > 0 ? (
-          thread.messages.map((msg, index) => {
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+          {thread?.messages && Array.isArray(thread.messages) && thread.messages.length > 0 ? (
+            thread.messages.map((msg, index) => {
             const isOwn = msg.sender?._id === user?._id || msg.sender?._id === user?._id
             return (
               <div

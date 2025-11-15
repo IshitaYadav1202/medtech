@@ -6,7 +6,7 @@ import { FiX } from 'react-icons/fi'
 import { medicationsAPI } from '../api/medications'
 import toast from 'react-hot-toast'
 
-const MedModal = ({ open, onClose, medication = null, patientId }) => {
+const MedModal = ({ open, onClose, medication = null, patientId = null }) => {
   const [formData, setFormData] = useState({
     name: '',
     dose: '',
@@ -46,19 +46,31 @@ const MedModal = ({ open, onClose, medication = null, patientId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // Validation
+    if (!formData.name || !formData.dose || !formData.frequency) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    
     setLoading(true)
     try {
+      const dataToSend = { ...formData }
+      if (patientId) {
+        dataToSend.patientId = patientId
+      }
+      
       if (medication) {
-        await medicationsAPI.update(medication._id, { ...formData, patientId })
+        await medicationsAPI.update(medication._id, dataToSend)
         toast.success('Medication updated successfully')
       } else {
-        await medicationsAPI.create({ ...formData, patientId })
+        await medicationsAPI.create(dataToSend)
         toast.success('Medication added successfully')
       }
       onClose()
     } catch (error) {
       console.error('Error saving medication:', error)
-      toast.error(error.response?.data?.message || 'Failed to save medication')
+      toast.error(error.response?.data?.message || error.message || 'Failed to save medication')
     } finally {
       setLoading(false)
     }

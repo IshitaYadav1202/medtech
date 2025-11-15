@@ -6,7 +6,7 @@ import { FiX } from 'react-icons/fi'
 import { appointmentsAPI } from '../api/appointments'
 import toast from 'react-hot-toast'
 
-const ApptModal = ({ open, onClose, appointment = null, selectedDate = null, patientId }) => {
+const ApptModal = ({ open, onClose, appointment = null, selectedDate = null, patientId = null }) => {
   const [formData, setFormData] = useState({
     datetime: '',
     doctor: '',
@@ -50,19 +50,31 @@ const ApptModal = ({ open, onClose, appointment = null, selectedDate = null, pat
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // Validation
+    if (!formData.datetime || !formData.doctor) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    
     setLoading(true)
     try {
+      const dataToSend = { ...formData }
+      if (patientId) {
+        dataToSend.patientId = patientId
+      }
+      
       if (appointment) {
-        await appointmentsAPI.update(appointment._id, { ...formData, patientId })
+        await appointmentsAPI.update(appointment._id, dataToSend)
         toast.success('Appointment updated successfully')
       } else {
-        await appointmentsAPI.create({ ...formData, patientId })
+        await appointmentsAPI.create(dataToSend)
         toast.success('Appointment created successfully')
       }
       onClose()
     } catch (error) {
       console.error('Error saving appointment:', error)
-      toast.error(error.response?.data?.message || 'Failed to save appointment')
+      toast.error(error.response?.data?.message || error.message || 'Failed to save appointment')
     } finally {
       setLoading(false)
     }

@@ -7,7 +7,7 @@ import { FiX, FiMic } from 'react-icons/fi'
 import { symptomsAPI } from '../api/symptoms'
 import toast from 'react-hot-toast'
 
-const SymptomModal = ({ open, onClose, patientId }) => {
+const SymptomModal = ({ open, onClose, patientId = null }) => {
   const [formData, setFormData] = useState({
     severity: 5,
     mood: 'neutral',
@@ -36,18 +36,29 @@ const SymptomModal = ({ open, onClose, patientId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // Validation
+    if (!formData.note && formData.symptoms.length === 0) {
+      toast.error('Please add at least a note or symptom')
+      return
+    }
+    
     setLoading(true)
     try {
-      await symptomsAPI.create({
+      const dataToSend = {
         ...formData,
-        patientId,
         timestamp: new Date().toISOString(),
-      })
+      }
+      if (patientId) {
+        dataToSend.patientId = patientId
+      }
+      
+      await symptomsAPI.create(dataToSend)
       toast.success('Symptom logged successfully')
       onClose()
     } catch (error) {
       console.error('Error logging symptom:', error)
-      toast.error(error.response?.data?.message || 'Failed to log symptom')
+      toast.error(error.response?.data?.message || error.message || 'Failed to log symptom')
     } finally {
       setLoading(false)
     }

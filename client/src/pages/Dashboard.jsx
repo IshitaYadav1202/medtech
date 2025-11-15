@@ -136,7 +136,7 @@ const Dashboard = () => {
         <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Care Feed Updates</h2>
         <div className="space-y-4">
           {feedItems.length > 0 ? (
-            feedItems.map((item) => <FeedItem key={item._id} item={item} />)
+            feedItems.filter(item => item && item._id).map((item) => <FeedItem key={item._id} item={item} />)
           ) : (
             <p className="text-gray-500 text-center py-8">No recent updates</p>
           )}

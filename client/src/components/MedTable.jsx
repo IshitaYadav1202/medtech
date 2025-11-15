@@ -35,7 +35,8 @@ const MedTable = ({ medications, onMarkTaken, onEdit, onDelete }) => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {medications?.map((med) => (
+          {medications && Array.isArray(medications) && medications.length > 0 ? (
+            medications.map((med) => (
             <tr key={med._id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-medium text-gray-900">{med.name}</div>
@@ -91,7 +92,14 @@ const MedTable = ({ medications, onMarkTaken, onEdit, onDelete }) => {
                 </button>
               </td>
             </tr>
-          ))}
+            ))
+          ) : (
+            <tr>
+              <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
+                No medications found
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

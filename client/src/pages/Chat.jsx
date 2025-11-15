@@ -115,7 +115,7 @@ const Chat = () => {
         </div>
         <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-12rem)]">
           {threads.length > 0 ? (
-            threads.map((thread) => (
+            threads.filter(thread => thread && thread._id).map((thread) => (
               <div
                 key={thread._id}
                 onClick={() => setSelectedThread(thread)}

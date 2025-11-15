@@ -53,10 +53,18 @@ export const createMedication = async (req, res, next) => {
   try {
     const medication = await Medication.create(req.body)
 
-    // Add to patient's medications array
-    await Patient.findByIdAndUpdate(req.body.patient, {
-      $push: { medications: medication._id },
-    })
+    // Add to patient's medications array if patientId is provided
+    if (req.body.patient || req.body.patientId) {
+      const patientId = req.body.patient || req.body.patientId
+      try {
+        await Patient.findByIdAndUpdate(patientId, {
+          $push: { medications: medication._id },
+        })
+      } catch (patientError) {
+        // Patient not found, but medication is created - continue
+        console.warn('Patient not found for medication:', patientError.message)
+      }
+    }
 
     res.status(201).json({
       success: true,

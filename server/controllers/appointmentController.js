@@ -58,10 +58,18 @@ export const createAppointment = async (req, res, next) => {
   try {
     const appointment = await Appointment.create(req.body)
 
-    // Add to patient's appointments array
-    await Patient.findByIdAndUpdate(req.body.patient, {
-      $push: { appointments: appointment._id },
-    })
+    // Add to patient's appointments array if patientId is provided
+    if (req.body.patient || req.body.patientId) {
+      const patientId = req.body.patient || req.body.patientId
+      try {
+        await Patient.findByIdAndUpdate(patientId, {
+          $push: { appointments: appointment._id },
+        })
+      } catch (patientError) {
+        // Patient not found, but appointment is created - continue
+        console.warn('Patient not found for appointment:', patientError.message)
+      }
+    }
 
     // TODO: Generate AI suggestions based on previous appointments
     // appointment.aiSuggestions = await generateAISuggestions(req.body.patient)

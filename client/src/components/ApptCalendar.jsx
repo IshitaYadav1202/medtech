@@ -12,9 +12,9 @@ const ApptCalendar = ({ appointments, onDateSelect, onAppointmentClick }) => {
   const [view, setView] = useState('month') // month, week, day
 
   const tileContent = ({ date, view }) => {
-    if (view === 'month') {
-      const dayAppts = appointments?.filter(
-        (apt) => new Date(apt.datetime).toDateString() === date.toDateString()
+    if (view === 'month' && appointments && Array.isArray(appointments)) {
+      const dayAppts = appointments.filter(
+        (apt) => apt && apt.datetime && new Date(apt.datetime).toDateString() === date.toDateString()
       )
       if (dayAppts && dayAppts.length > 0) {
         return (
@@ -80,10 +80,10 @@ const ApptCalendar = ({ appointments, onDateSelect, onAppointmentClick }) => {
           {formatDate(date)} Appointments
         </h3>
         <div className="space-y-2 max-h-64 overflow-y-auto">
-          {appointments && appointments.length > 0 ? (
+          {appointments && Array.isArray(appointments) && appointments.length > 0 ? (
             appointments
               .filter(
-                (apt) => new Date(apt.datetime).toDateString() === date.toDateString()
+                (apt) => apt && apt.datetime && new Date(apt.datetime).toDateString() === date.toDateString()
               )
               .map((apt) => (
                 <div

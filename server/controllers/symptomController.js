@@ -65,10 +65,18 @@ export const createSymptom = async (req, res, next) => {
 
     const symptom = await Symptom.create(symptomData)
 
-    // Add to patient's symptoms array
-    await Patient.findByIdAndUpdate(req.body.patient, {
-      $push: { symptoms: symptom._id },
-    })
+    // Add to patient's symptoms array if patientId is provided
+    if (req.body.patient || req.body.patientId) {
+      const patientId = req.body.patient || req.body.patientId
+      try {
+        await Patient.findByIdAndUpdate(patientId, {
+          $push: { symptoms: symptom._id },
+        })
+      } catch (patientError) {
+        // Patient not found, but symptom is created - continue
+        console.warn('Patient not found for symptom:', patientError.message)
+      }
+    }
 
     // TODO: Check for patterns and generate alerts if needed
     // await checkSymptomPatterns(symptom)

@@ -37,7 +37,7 @@ const FeedItem = ({ item, onLike, onComment, onShare }) => {
 
           <div className="mt-2">
             <p className="text-gray-700">{item.content}</p>
-            {item.tags && item.tags.length > 0 && (
+            {item.tags && Array.isArray(item.tags) && item.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
                 {item.tags.map((tag, idx) => (
                   <span
@@ -52,7 +52,7 @@ const FeedItem = ({ item, onLike, onComment, onShare }) => {
           </div>
 
           {/* Comments */}
-          {item.comments && item.comments.length > 0 && (
+          {item.comments && Array.isArray(item.comments) && item.comments.length > 0 && (
             <div className="mt-4 space-y-2 border-t border-gray-200 pt-3">
               {item.comments.map((comment, idx) => (
                 <div key={idx} className="flex items-start space-x-2">
