@@ -21,9 +21,19 @@ const Login = () => {
       toast.success('Login successful!')
       navigate('/dashboard')
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || 'Login failed. Please check your credentials.'
-      toast.error(errorMsg)
       console.error('Login error details:', error)
+      
+      let errorMsg = 'Login failed. Please check your credentials.'
+      
+      if (error.isNetworkError || !error.response) {
+        errorMsg = 'Network Error: Cannot connect to server. Please make sure the backend server is running on port 5000.'
+      } else if (error.response?.data?.message) {
+        errorMsg = error.response.data.message
+      } else if (error.message) {
+        errorMsg = error.message
+      }
+      
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
     }

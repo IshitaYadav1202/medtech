@@ -40,9 +40,19 @@ const Register = () => {
       toast.success('Registration successful!')
       navigate('/onboarding')
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || 'Registration failed. Please try again.'
-      toast.error(errorMsg)
       console.error('Registration error details:', error)
+      
+      let errorMsg = 'Registration failed. Please try again.'
+      
+      if (error.isNetworkError || !error.response) {
+        errorMsg = 'Network Error: Cannot connect to server. Please make sure the backend server is running on port 5000.'
+      } else if (error.response?.data?.message) {
+        errorMsg = error.response.data.message
+      } else if (error.message) {
+        errorMsg = error.message
+      }
+      
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
     }

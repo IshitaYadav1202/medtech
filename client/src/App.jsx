@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast'
 import AppRouter from './router'
 import { AuthProvider } from './contexts/AuthContext'
 import { SocketProvider } from './contexts/SocketContext'
+import NetworkStatus from './components/NetworkStatus'
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <Router>
           <AppRouter />
           <Toaster position="top-right" />
+          <NetworkStatus />
         </Router>
       </SocketProvider>
     </AuthProvider>

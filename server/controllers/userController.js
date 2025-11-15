@@ -16,10 +16,28 @@ export const register = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body
 
+    // Validate input
+    if (!name || !email || !password) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Please provide name, email, and password' 
+      })
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Password must be at least 6 characters' 
+      })
+    }
+
     // Check if user exists
     const userExists = await User.findOne({ email })
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' })
+      return res.status(400).json({ 
+        success: false,
+        message: 'User already exists with this email' 
+      })
     }
 
     // Create user
@@ -27,7 +45,7 @@ export const register = async (req, res, next) => {
       name,
       email,
       password,
-      role,
+      role: role || 'caregiver',
     })
 
     // Generate token
@@ -42,8 +60,10 @@ export const register = async (req, res, next) => {
         email: user.email,
         role: user.role,
       },
+      message: 'Registration successful',
     })
   } catch (error) {
+    console.error('Registration error:', error)
     next(error)
   }
 }
