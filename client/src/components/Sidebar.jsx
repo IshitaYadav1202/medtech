@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import {
   FiHome,
-  FiPill,
+  FiPackage,
   FiCalendar,
   FiActivity,
   FiRss,
@@ -14,7 +14,7 @@ const Sidebar = ({ open, setOpen }) => {
 
   const menuItems = [
     { path: '/dashboard', icon: FiHome, label: 'Dashboard' },
-    { path: '/medications', icon: FiPill, label: 'Medications' },
+    { path: '/medications', icon: FiPackage, label: 'Medications' },
     { path: '/appointments', icon: FiCalendar, label: 'Appointments' },
     { path: '/symptoms', icon: FiActivity, label: 'Symptoms' },
     { path: '/feed', icon: FiRss, label: 'Care Feed' },

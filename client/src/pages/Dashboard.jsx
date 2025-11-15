@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FiPill, FiCalendar, FiActivity, FiAlertCircle } from 'react-icons/fi'
+import { FiPackage, FiCalendar, FiActivity, FiAlertCircle } from 'react-icons/fi'
 import DashboardCard from '../components/DashboardCard'
 import FeedItem from '../components/FeedItem'
 import { medicationsAPI } from '../api/medications'
@@ -103,7 +103,7 @@ const Dashboard = () => {
         <DashboardCard
           title="Missed Medications"
           value={stats.missedMeds}
-          icon={FiPill}
+          icon={FiPackage}
           trend={stats.missedMeds > 0 ? 1 : 0}
           trendLabel="needs attention"
         />
