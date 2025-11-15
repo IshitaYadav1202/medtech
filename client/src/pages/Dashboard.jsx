@@ -50,9 +50,9 @@ const Dashboard = () => {
         feedAPI.getAll({ limit: 5 }).catch(() => ({ data: [] })),
       ])
 
-      const meds = medsResponse.data || medsResponse || []
-      const appts = apptsResponse.data || apptsResponse || []
-      const feed = feedResponse.data || feedResponse || []
+      const meds = Array.isArray(medsResponse.data) ? medsResponse.data : (Array.isArray(medsResponse) ? medsResponse : [])
+      const appts = Array.isArray(apptsResponse.data) ? apptsResponse.data : (Array.isArray(apptsResponse) ? apptsResponse : [])
+      const feed = Array.isArray(feedResponse.data) ? feedResponse.data : (Array.isArray(feedResponse) ? feedResponse : [])
 
       const missedMeds = meds.filter((m) => m.missedDoses > 0).length
       const upcomingAppts = appts.filter(
