@@ -24,9 +24,14 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      // Only redirect if not already on login/register page
+      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+        window.location.href = '/login'
+      }
     }
-    return Promise.reject(error)
+    // Return error with proper message
+    const errorMessage = error.response?.data?.message || error.message || 'An error occurred'
+    return Promise.reject({ ...error, message: errorMessage })
   }
 )
 

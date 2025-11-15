@@ -38,17 +38,37 @@ export const AuthProvider = ({ children }) => {
   }
 
   const login = async (email, password) => {
-    const response = await authAPI.login(email, password)
-    localStorage.setItem('token', response.token)
-    setUser(response.user)
-    return response
+    try {
+      const response = await authAPI.login(email, password)
+      if (response && response.token) {
+        localStorage.setItem('token', response.token)
+        setUser(response.user || response)
+        return response
+      } else {
+        throw new Error('Invalid response from server')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      throw error
+    }
   }
 
   const register = async (userData) => {
-    const response = await authAPI.register(userData)
-    localStorage.setItem('token', response.token)
-    setUser(response.user)
-    return response
+    try {
+      // Remove confirmPassword before sending
+      const { confirmPassword, ...dataToSend } = userData
+      const response = await authAPI.register(dataToSend)
+      if (response && response.token) {
+        localStorage.setItem('token', response.token)
+        setUser(response.user || response)
+        return response
+      } else {
+        throw new Error('Invalid response from server')
+      }
+    } catch (error) {
+      console.error('Register error:', error)
+      throw error
+    }
   }
 
   const logout = () => {

@@ -85,6 +85,7 @@ export const login = async (req, res, next) => {
         role: user.role,
         group: user.group,
       },
+      message: 'Login successful',
     })
   } catch (error) {
     next(error)

@@ -11,13 +11,19 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!formData.email || !formData.password) {
+      toast.error('Please fill in all fields')
+      return
+    }
     setLoading(true)
     try {
       await login(formData.email, formData.password)
       toast.success('Login successful!')
       navigate('/dashboard')
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed')
+      const errorMsg = error.response?.data?.message || error.message || 'Login failed. Please check your credentials.'
+      toast.error(errorMsg)
+      console.error('Login error details:', error)
     } finally {
       setLoading(false)
     }

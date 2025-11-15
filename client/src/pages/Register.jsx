@@ -17,17 +17,32 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // Validation
+    if (!formData.name || !formData.email || !formData.password) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    
+    if (formData.password.length < 6) {
+      toast.error('Password must be at least 6 characters')
+      return
+    }
+    
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match')
       return
     }
+    
     setLoading(true)
     try {
       await register(formData)
       toast.success('Registration successful!')
       navigate('/onboarding')
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed')
+      const errorMsg = error.response?.data?.message || error.message || 'Registration failed. Please try again.'
+      toast.error(errorMsg)
+      console.error('Registration error details:', error)
     } finally {
       setLoading(false)
     }
