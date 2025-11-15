@@ -17,9 +17,12 @@ const Appointments = () => {
 
   const loadAppointments = async () => {
     try {
-      const data = await appointmentsAPI.getAll()
-      setAppointments(data)
+      const response = await appointmentsAPI.getAll()
+      const data = response.data || response || []
+      setAppointments(Array.isArray(data) ? data : [])
     } catch (error) {
+      console.error('Error loading appointments:', error)
+      setAppointments([])
       toast.error('Failed to load appointments')
     } finally {
       setLoading(false)
@@ -59,16 +62,26 @@ const Appointments = () => {
         </button>
       </div>
 
-      <ApptCalendar
-        appointments={appointments}
-        onDateSelect={handleDateSelect}
-        onAppointmentClick={handleAppointmentClick}
-      />
+      {appointments.length > 0 || true ? (
+        <ApptCalendar
+          appointments={appointments}
+          onDateSelect={handleDateSelect}
+          onAppointmentClick={handleAppointmentClick}
+        />
+      ) : (
+        <div className="card text-center py-12">
+          <p className="text-gray-500 mb-4">No appointments scheduled yet</p>
+          <button onClick={() => setShowModal(true)} className="btn-primary">
+            + Schedule Your First Appointment
+          </button>
+        </div>
+      )}
 
       <ApptModal
         open={showModal}
         onClose={handleModalClose}
         appointment={selectedAppt}
+        selectedDate={selectedDate}
       />
     </div>
   )

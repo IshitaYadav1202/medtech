@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { FiX } from 'react-icons/fi'
 import { medicationsAPI } from '../api/medications'
+import toast from 'react-hot-toast'
 
 const MedModal = ({ open, onClose, medication = null, patientId }) => {
   const [formData, setFormData] = useState({
@@ -16,25 +17,50 @@ const MedModal = ({ open, onClose, medication = null, patientId }) => {
     notes: '',
     responsibleUser: '',
   })
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (medication) {
-      setFormData(medication)
+      // Format dates for input fields
+      const startDate = medication.startDate ? new Date(medication.startDate).toISOString().split('T')[0] : ''
+      const endDate = medication.endDate ? new Date(medication.endDate).toISOString().split('T')[0] : ''
+      setFormData({
+        ...medication,
+        startDate,
+        endDate,
+      })
+    } else {
+      // Reset form
+      setFormData({
+        name: '',
+        dose: '',
+        frequency: '',
+        startDate: '',
+        endDate: '',
+        prescribedBy: '',
+        notes: '',
+        responsibleUser: '',
+      })
     }
-  }, [medication])
+  }, [medication, open])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setLoading(true)
     try {
       if (medication) {
         await medicationsAPI.update(medication._id, { ...formData, patientId })
+        toast.success('Medication updated successfully')
       } else {
         await medicationsAPI.create({ ...formData, patientId })
+        toast.success('Medication added successfully')
       }
       onClose()
-      // Refresh medications list
     } catch (error) {
       console.error('Error saving medication:', error)
+      toast.error(error.response?.data?.message || 'Failed to save medication')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -148,11 +174,11 @@ const MedModal = ({ open, onClose, medication = null, patientId }) => {
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">
-            <button type="button" onClick={onClose} className="btn-secondary">
+            <button type="button" onClick={onClose} className="btn-secondary" disabled={loading}>
               Cancel
             </button>
-            <button type="submit" className="btn-primary">
-              {medication ? 'Update' : 'Add'} Medication
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? 'Saving...' : medication ? 'Update' : 'Add'} Medication
             </button>
           </div>
         </form>

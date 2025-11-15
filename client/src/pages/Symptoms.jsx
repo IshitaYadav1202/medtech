@@ -38,9 +38,12 @@ const Symptoms = () => {
 
   const loadSymptoms = async () => {
     try {
-      const data = await symptomsAPI.getAll()
-      setSymptoms(data)
+      const response = await symptomsAPI.getAll()
+      const data = response.data || response || []
+      setSymptoms(Array.isArray(data) ? data : [])
     } catch (error) {
+      console.error('Error loading symptoms:', error)
+      setSymptoms([])
       toast.error('Failed to load symptoms')
     } finally {
       setLoading(false)

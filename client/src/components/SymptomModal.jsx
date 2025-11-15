@@ -2,9 +2,10 @@
  * SymptomModal - Modal for logging symptoms
  * Supports: emoji/mood picker, slider, text, voice note input
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FiX, FiMic } from 'react-icons/fi'
 import { symptomsAPI } from '../api/symptoms'
+import toast from 'react-hot-toast'
 
 const SymptomModal = ({ open, onClose, patientId }) => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,15 @@ const SymptomModal = ({ open, onClose, patientId }) => {
     symptoms: [],
   })
   const [recording, setRecording] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!open) {
+      // Reset form when modal closes
+      setFormData({ severity: 5, mood: 'neutral', note: '', symptoms: [] })
+      setRecording(false)
+    }
+  }, [open])
 
   const moods = [
     { emoji: '😊', value: 'happy' },
@@ -26,16 +36,20 @@ const SymptomModal = ({ open, onClose, patientId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setLoading(true)
     try {
       await symptomsAPI.create({
         ...formData,
         patientId,
         timestamp: new Date().toISOString(),
       })
+      toast.success('Symptom logged successfully')
       onClose()
-      setFormData({ severity: 5, mood: 'neutral', note: '', symptoms: [] })
     } catch (error) {
       console.error('Error logging symptom:', error)
+      toast.error(error.response?.data?.message || 'Failed to log symptom')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -128,11 +142,11 @@ const SymptomModal = ({ open, onClose, patientId }) => {
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">
-            <button type="button" onClick={onClose} className="btn-secondary">
+            <button type="button" onClick={onClose} className="btn-secondary" disabled={loading}>
               Cancel
             </button>
-            <button type="submit" className="btn-primary">
-              Log Symptom
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? 'Logging...' : 'Log Symptom'}
             </button>
           </div>
         </form>

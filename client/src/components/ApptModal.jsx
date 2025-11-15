@@ -4,8 +4,9 @@
 import { useState, useEffect } from 'react'
 import { FiX } from 'react-icons/fi'
 import { appointmentsAPI } from '../api/appointments'
+import toast from 'react-hot-toast'
 
-const ApptModal = ({ open, onClose, appointment = null, patientId }) => {
+const ApptModal = ({ open, onClose, appointment = null, selectedDate = null, patientId }) => {
   const [formData, setFormData] = useState({
     datetime: '',
     doctor: '',
@@ -14,24 +15,56 @@ const ApptModal = ({ open, onClose, appointment = null, patientId }) => {
     notes: '',
     checklist: [],
   })
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (appointment) {
-      setFormData(appointment)
+      // Format datetime for input field
+      const date = new Date(appointment.datetime)
+      const formattedDate = date.toISOString().slice(0, 16)
+      setFormData({
+        ...appointment,
+        datetime: formattedDate,
+      })
+    } else if (selectedDate) {
+      // Set selected date from calendar
+      const date = new Date(selectedDate)
+      date.setHours(9, 0, 0, 0) // Default to 9 AM
+      const formattedDate = date.toISOString().slice(0, 16)
+      setFormData({
+        ...formData,
+        datetime: formattedDate,
+      })
+    } else {
+      // Reset form for new appointment
+      setFormData({
+        datetime: '',
+        doctor: '',
+        location: '',
+        reason: '',
+        notes: '',
+        checklist: [],
+      })
     }
-  }, [appointment])
+  }, [appointment, selectedDate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setLoading(true)
     try {
       if (appointment) {
         await appointmentsAPI.update(appointment._id, { ...formData, patientId })
+        toast.success('Appointment updated successfully')
       } else {
         await appointmentsAPI.create({ ...formData, patientId })
+        toast.success('Appointment created successfully')
       }
       onClose()
     } catch (error) {
       console.error('Error saving appointment:', error)
+      toast.error(error.response?.data?.message || 'Failed to save appointment')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -112,11 +145,11 @@ const ApptModal = ({ open, onClose, appointment = null, patientId }) => {
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">
-            <button type="button" onClick={onClose} className="btn-secondary">
+            <button type="button" onClick={onClose} className="btn-secondary" disabled={loading}>
               Cancel
             </button>
-            <button type="submit" className="btn-primary">
-              {appointment ? 'Update' : 'Add'} Appointment
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? 'Saving...' : appointment ? 'Update' : 'Add'} Appointment
             </button>
           </div>
         </form>

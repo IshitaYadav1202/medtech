@@ -79,37 +79,41 @@ const ApptCalendar = ({ appointments, onDateSelect, onAppointmentClick }) => {
         <h3 className="text-lg font-semibold mb-3">
           {formatDate(date)} Appointments
         </h3>
-        <div className="space-y-2">
-          {appointments
-            ?.filter(
-              (apt) => new Date(apt.datetime).toDateString() === date.toDateString()
-            )
-            .map((apt) => (
-              <div
-                key={apt._id}
-                onClick={() => onAppointmentClick && onAppointmentClick(apt)}
-                className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium text-gray-900">{apt.doctor}</p>
-                    <p className="text-sm text-gray-600">{apt.location}</p>
-                    <p className="text-sm text-gray-500">{formatTime(apt.datetime)}</p>
+        <div className="space-y-2 max-h-64 overflow-y-auto">
+          {appointments && appointments.length > 0 ? (
+            appointments
+              .filter(
+                (apt) => new Date(apt.datetime).toDateString() === date.toDateString()
+              )
+              .map((apt) => (
+                <div
+                  key={apt._id || Math.random()}
+                  onClick={() => onAppointmentClick && onAppointmentClick(apt)}
+                  className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium text-gray-900">{apt.doctor || 'Unknown Doctor'}</p>
+                      <p className="text-sm text-gray-600">{apt.location || 'No location'}</p>
+                      <p className="text-sm text-gray-500">{formatTime(apt.datetime)}</p>
+                    </div>
+                    <span
+                      className={`px-2 py-1 text-xs rounded ${
+                        getUrgencyColor(apt.datetime) === 'red'
+                          ? 'bg-red-100 text-red-800'
+                          : getUrgencyColor(apt.datetime) === 'orange'
+                          ? 'bg-orange-100 text-orange-800'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}
+                    >
+                      {apt.reason || 'Appointment'}
+                    </span>
                   </div>
-                  <span
-                    className={`px-2 py-1 text-xs rounded ${
-                      getUrgencyColor(apt.datetime) === 'red'
-                        ? 'bg-red-100 text-red-800'
-                        : getUrgencyColor(apt.datetime) === 'orange'
-                        ? 'bg-orange-100 text-orange-800'
-                        : 'bg-blue-100 text-blue-800'
-                    }`}
-                  >
-                    {apt.reason}
-                  </span>
                 </div>
-              </div>
-            ))}
+              ))
+          ) : (
+            <p className="text-gray-500 text-center py-4">No appointments for this date</p>
+          )}
         </div>
       </div>
     </div>

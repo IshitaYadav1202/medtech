@@ -16,9 +16,12 @@ const Medications = () => {
 
   const loadMedications = async () => {
     try {
-      const data = await medicationsAPI.getAll()
-      setMedications(data)
+      const response = await medicationsAPI.getAll()
+      const data = response.data || response || []
+      setMedications(Array.isArray(data) ? data : [])
     } catch (error) {
+      console.error('Error loading medications:', error)
+      setMedications([])
       toast.error('Failed to load medications')
     } finally {
       setLoading(false)
@@ -74,12 +77,21 @@ const Medications = () => {
         </button>
       </div>
 
-      <MedTable
-        medications={medications}
-        onMarkTaken={handleMarkTaken}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      {medications.length > 0 ? (
+        <MedTable
+          medications={medications}
+          onMarkTaken={handleMarkTaken}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      ) : (
+        <div className="card text-center py-12">
+          <p className="text-gray-500 mb-4">No medications added yet</p>
+          <button onClick={() => setShowModal(true)} className="btn-primary">
+            + Add Your First Medication
+          </button>
+        </div>
+      )}
 
       <MedModal
         open={showModal}

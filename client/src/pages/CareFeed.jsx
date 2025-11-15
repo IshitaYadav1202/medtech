@@ -14,9 +14,12 @@ const CareFeed = () => {
 
   const loadFeed = async () => {
     try {
-      const data = await feedAPI.getAll(filters)
-      setFeedItems(data)
+      const response = await feedAPI.getAll(filters)
+      const data = response.data || response || []
+      setFeedItems(Array.isArray(data) ? data : [])
     } catch (error) {
+      console.error('Error loading feed:', error)
+      setFeedItems([])
       toast.error('Failed to load feed')
     } finally {
       setLoading(false)
