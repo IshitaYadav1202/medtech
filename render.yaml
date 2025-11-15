@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: carepulse-server
+    env: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        fromService:
+          type: web
+          name: carepulse-client
+          property: url
+      - key: AI_SERVICE_URL
+        fromService:
+          type: web
+          name: carepulse-ai
+          property: url
+
+  - type: web
+    name: carepulse-client
+    env: node
+    buildCommand: cd client && npm install && npm run build
+    startCommand: cd client && npm start
+    staticPublishPath: ./client/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: carepulse-server
+          property: url
+
+  - type: web
+    name: carepulse-ai
+    env: python
+    buildCommand: cd ai-service && pip install -r requirements.txt
+    startCommand: cd ai-service && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PORT
+        value: 8000
+
