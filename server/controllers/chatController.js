@@ -5,6 +5,15 @@ import Chat from '../models/Chat.js'
 // @access  Private
 export const getThreads = async (req, res, next) => {
   try {
+    // If user doesn't have a group, return empty array
+    if (!req.user.group) {
+      return res.json({
+        success: true,
+        count: 0,
+        data: [],
+      })
+    }
+
     const threads = await Chat.find({ group: req.user.group })
       .populate('participants', 'name email avatar')
       .populate('messages.sender', 'name avatar')
@@ -49,10 +58,19 @@ export const createThread = async (req, res, next) => {
   try {
     const { title, participants } = req.body
 
+    // If user doesn't have a group, create a default one or return error
+    if (!req.user.group) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please join a care group first',
+      })
+    }
+
     const threadData = {
-      title,
+      title: title || `Chat ${new Date().toLocaleDateString()}`,
       group: req.user.group,
       participants: participants || [req.user._id],
+      messages: [],
     }
 
     const thread = await Chat.create(threadData)
@@ -71,17 +89,28 @@ export const createThread = async (req, res, next) => {
 // @access  Private
 export const sendMessage = async (req, res, next) => {
   try {
-    const { content, attachments } = req.body
+    const { content } = req.body
+    
+    if (!content || !content.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message content is required',
+      })
+    }
+
     const thread = await Chat.findById(req.params.id)
 
     if (!thread) {
-      return res.status(404).json({ message: 'Chat thread not found' })
+      return res.status(404).json({
+        success: false,
+        message: 'Chat thread not found',
+      })
     }
 
     const message = {
       sender: req.user._id,
-      content,
-      attachments: attachments || [],
+      content: content.trim(),
+      attachments: [],
       timestamp: new Date(),
     }
 
@@ -89,12 +118,19 @@ export const sendMessage = async (req, res, next) => {
     thread.lastMessage = new Date()
     await thread.save()
 
+    // Populate sender info for response
+    await thread.populate('messages.sender', 'name avatar')
+
     // Emit socket event for real-time updates
     const io = req.app.get('io')
-    if (io) {
+    if (io && req.user.group) {
       io.to(`group:${req.user.group}`).emit('message:new', {
         threadId: thread._id,
         ...message,
+        sender: {
+          _id: req.user._id,
+          name: req.user.name,
+        },
       })
     }
 

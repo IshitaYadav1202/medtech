@@ -6,6 +6,16 @@ import Feed from '../models/Feed.js'
 export const getFeedItems = async (req, res, next) => {
   try {
     const { type, urgent, limit = 20 } = req.query
+    
+    // If user doesn't have a group, return empty array
+    if (!req.user.group) {
+      return res.json({
+        success: true,
+        count: 0,
+        data: [],
+      })
+    }
+
     const query = { group: req.user.group }
 
     if (type) query.type = type
